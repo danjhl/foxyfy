@@ -2,13 +2,13 @@
 
 version: '3'
 
-# vars:
-#   GREETING: Hello, World!
-
 tasks:
+  build:
+    cmds:
+      - go build -o ./out/foxyfy ./cmd/foxyfy
   run:
     cmds:
       - go run ./cmd/foxyfy/main.go
-  build:
+  test:
     cmds:
-      - go build -o out/foxyfy ./cmd/foxyfy 
+      - go test ./internal/lib/test

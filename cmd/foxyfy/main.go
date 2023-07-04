@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"foxyfy/internal/lib"
+)
 
 func main() {
-	fmt.Println("test")
+	fmt.Println(lib.Greet("Mika"))
 }
