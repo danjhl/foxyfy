@@ -11,4 +11,4 @@ tasks:
       - go run ./cmd/foxyfy/main.go
   test:
     cmds:
-      - go test ./internal/lib/test
+      - go test ./...
