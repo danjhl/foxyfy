@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"foxyfy/internal/lib"
+	"foxyfy/cmd/foxyfy/commands"
+	"os"
 )
 
 func main() {
-	fmt.Println(lib.Greet("Mika"))
+	rootCmd := commands.NewRootCmd(os.Stdout)
+	rootCmd.Execute()
 }

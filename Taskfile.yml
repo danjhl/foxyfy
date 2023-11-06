@@ -8,7 +8,7 @@ tasks:
       - go build -o ./out/foxyfy ./cmd/foxyfy
   run:
     cmds:
-      - go run ./cmd/foxyfy/main.go
+      - go run ./cmd/foxyfy/main.go {{.CLI_ARGS}} 
   test:
     cmds:
       - go test ./...
