@@ -3,7 +3,6 @@ package commands_test
 import (
 	"bytes"
 	"foxyfy/cmd/foxyfy/commands"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,18 +10,18 @@ import (
 
 func TestHelpCmd(t *testing.T) {
 	var out bytes.Buffer
-	rootCmd := commands.NewRootCmd(&out)
-	os.Args = []string{"bin", "help"}
-	rootCmd.Execute()
+	helpCmd := commands.NewHelpCmd(&out)
+	args := []string{}
+	helpCmd.Execute(args)
 
 	assert.Equal(t, expected(), out.String())
 }
 
 func TestHelpCmdIsDefault(t *testing.T) {
 	var out bytes.Buffer
-	rootCmd := commands.NewRootCmd(&out)
-	os.Args = []string{"bin"}
-	rootCmd.Execute()
+	helpCmd := commands.NewHelpCmd(&out)
+	args := []string{}
+	helpCmd.Execute(args)
 
 	assert.Equal(t, expected(), out.String())
 }

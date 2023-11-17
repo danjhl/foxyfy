@@ -20,49 +20,48 @@ func TestLs(t *testing.T) {
 	defer removeTestDb(file, t)
 
 	var out bytes.Buffer
-	rootCmd := commands.NewRootCmd(&out)
-	os.Args = []string{"bin", "ls", "-b", "music", "-db", file}
-	rootCmd.Execute()
+	lsCmd := commands.NewLsCmd(&out)
+	args := []string{"-b", "music", "-db", file}
+	lsCmd.Execute(args)
 
-	expected := "song1 - music/song1\n" +
-		"---- subdir ----\n" +
-		"song2 - music/song2\n" +
-		"song3 - music/song3\n"
+	expected := "/song1 (https://www.youtube.com/watch?v=song1)\n" +
+		"subdir/song2 (https://www.youtube.com/watch?v=song2)\n" +
+		"subdir/song3 (https://www.youtube.com/watch?v=song3)\n" +
+		"subdir/subdir/song4 (https://www.youtube.com/watch?v=song4)\n"
 
 	assert.Equal(t, expected, out.String())
 }
 
 func TestLsWithMissingParams(t *testing.T) {
-	args := []string{"bin", "ls", "-db", "./file.db"}
+	args := []string{"-db", "./file.db"}
 	expected := "Missing -b argument\n"
 	testCmd(args, expected, t)
 
-	args = []string{"bin", "ls", "-b", "", "-db", "./file.db"}
+	args = []string{"-b", "", "-db", "./file.db"}
 	expected = "Missing -b argument\n"
 	testCmd(args, expected, t)
 
-	args = []string{"bin", "ls", "-b", "music"}
+	args = []string{"-b", "music"}
 	expected = "Missing -db argument\n"
 	testCmd(args, expected, t)
 
-	args = []string{"bin", "ls", "-b", "music", "-db", ""}
+	args = []string{"-b", "music", "-db", ""}
 	expected = "Missing -db argument\n"
 	testCmd(args, expected, t)
 }
 
 func TestLsWithMissingDbFile(t *testing.T) {
-	args := []string{"bin", "ls", "-b", "music", "-db", "./file.db"}
+	args := []string{"-b", "music", "-db", "./file.db"}
 	expected := "Database './file.db' does not exist\n"
 	testCmd(args, expected, t)
 }
 
 func testCmd(args []string, expectedOut string, t *testing.T) {
 	var out bytes.Buffer
-	rootCmd := commands.NewRootCmd(&out)
-	os.Args = args
+	lsCmd := commands.NewLsCmd(&out)
 
 	resetFlags()
-	rootCmd.Execute()
+	lsCmd.Execute(args)
 
 	assert.Equal(t, expectedOut, out.String())
 }
@@ -99,13 +98,16 @@ func createTestDb(file string, t *testing.T) *sql.DB {
 			"insert into moz_bookmarks values(2, 1, 'song1', 1, 1);" +
 			"insert into moz_bookmarks values(3, 2, 'subdir', 1, null);" +
 			"insert into moz_bookmarks values(4, 1, 'song2', 3, 2);" +
-			"insert into moz_bookmarks values(5, 1, 'song3', 3, 3);")
+			"insert into moz_bookmarks values(5, 1, 'song3', 3, 3);" +
+			"insert into moz_bookmarks values(6, 2, 'subdir', 3, null);" +
+			"insert into moz_bookmarks values(7, 1, 'song4', 6, 4);")
 	assert.Nil(t, err)
 
 	_, err = db.Exec(
-		"insert into moz_places values(1, 'music/song1');" +
-			"insert into moz_places values(2, 'music/song2');" +
-			"insert into moz_places values(3, 'music/song3');")
+		"insert into moz_places values(1, 'https://www.youtube.com/watch?v=song1');" +
+			"insert into moz_places values(2, 'https://www.youtube.com/watch?v=song2');" +
+			"insert into moz_places values(3, 'https://www.youtube.com/watch?v=song3');" +
+			"insert into moz_places values(4, 'https://www.youtube.com/watch?v=song4');")
 	assert.Nil(t, err)
 
 	return db

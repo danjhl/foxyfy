@@ -3,31 +3,42 @@ package commands
 import (
 	"fmt"
 	"io"
-	"os"
 )
 
+type Cmd interface {
+	Execute(args []string)
+}
+
 type RootCmd struct {
-	out io.Writer
+	out       io.Writer
+	helpCmd   Cmd
+	lsCmd     Cmd
+	updateCmd Cmd
 }
 
-func NewRootCmd(out io.Writer) RootCmd {
-	return RootCmd{out: out}
+func NewRootCmd(out io.Writer, helpCmd Cmd, lsCmd Cmd, updateCmd Cmd) RootCmd {
+	return RootCmd{
+		out:       out,
+		helpCmd:   helpCmd,
+		lsCmd:     lsCmd,
+		updateCmd: updateCmd,
+	}
 }
 
-func (c RootCmd) Execute() {
-	if len(os.Args) < 2 {
-		helpCmd := NewHelpCmd(c.out)
-		helpCmd.Execute()
+func (c RootCmd) Execute(args []string) {
+	if len(args) < 1 {
+		c.helpCmd.Execute([]string{})
 		return
 	}
-	cmd := os.Args[1]
+	cmd := args[0]
+	cmdArgs := args[1:]
 
 	if cmd == "ls" {
-		lsCmd := NewLsCmd(c.out)
-		lsCmd.Execute()
+		c.lsCmd.Execute(cmdArgs)
 	} else if cmd == "help" {
-		helpCmd := NewHelpCmd(c.out)
-		helpCmd.Execute()
+		c.helpCmd.Execute(cmdArgs)
+	} else if cmd == "update" {
+		c.updateCmd.Execute(cmdArgs)
 	} else {
 		fmt.Fprintf(c.out, "Unknown command '%s'\n", cmd)
 	}
