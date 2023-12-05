@@ -2,6 +2,7 @@ package bookmarks
 
 import (
 	"database/sql"
+
 	_ "modernc.org/sqlite"
 )
 
@@ -100,20 +101,35 @@ func GetChildrenFor(id int, db Db) ([]Bookmark, error) {
 	return db.QueryChildrenFor(id)
 }
 
-func GetFlatBookmarksFor(id int, db Db) ([]Bookmark, error) {
+type ChildBookmark struct {
+	Dir string
+	Bm  Bookmark
+}
+
+func GetChildBookmarksFor(id int, parentDir string, db Db) ([]ChildBookmark, error) {
 	children, err := GetChildrenFor(id, db)
+
 	if err != nil {
 		return nil, err
 	}
-	var flat []Bookmark
+	var flat []ChildBookmark
 	for _, child := range children {
-		flat = append(flat, child)
+		withDir := ChildBookmark{Dir: parentDir, Bm: child}
 		if child.Bm_type == DirectoryBookmark {
-			nested, err := GetFlatBookmarksFor(child.Id, db)
+			var dir string
+			if parentDir != "" {
+				dir = parentDir + "/" + child.Title
+			} else {
+				dir = child.Title
+			}
+
+			nested, err := GetChildBookmarksFor(child.Id, dir, db)
 			if err != nil {
 				return nil, err
 			}
 			flat = append(flat, nested...)
+		} else {
+			flat = append(flat, withDir)
 		}
 	}
 	return flat, nil

@@ -13,7 +13,7 @@ func NewHelpCmd(out io.Writer) HelpCmd {
 	return HelpCmd{out: out}
 }
 
-func (c HelpCmd) Execute() {
+func (c HelpCmd) Execute(args []string) {
 	help := "\n" +
 		"Usage: [CMD] [FLAGS]\n\n" +
 		"ls -b [bookmark]                     List youtube bookmarks in parent [bookmark]\n\n"
