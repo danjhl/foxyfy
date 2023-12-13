@@ -5,21 +5,25 @@ import (
 	"strings"
 )
 
-// Produces a commandline safe version of the given filename
+// Produces a commandline safe and valid version of the given string
 // Does not allow ./ or ../ to be part of a filename
-func SanitizeFileName(fileName string) string {
-	result := fileName
+func SanitizeFileName(str string) string {
+	result := str
 
-	// Prevent directory manipulation
-	result = strings.ReplaceAll(result, ".", "")
-	result = strings.ReplaceAll(result, "/", "")
-	result = strings.ReplaceAll(result, "\\", "")
+	illegal := []string{
+		// Prevent directory manipulation
+		".", "/", "\\",
 
-	// Prevent injection of commands
-	result = strings.ReplaceAll(result, "\"", "")
-	result = strings.ReplaceAll(result, "'", "")
-	result = strings.ReplaceAll(result, "`", "")
-	result = strings.ReplaceAll(result, "´", "")
+		// Prevent injection of commands
+		"\"", "'", "`", "´",
+
+		// Replace special characters
+		",", ":", "*", "?", "<", ">", "|", "~", "´",
+	}
+
+	for _, c := range illegal {
+		result = strings.ReplaceAll(result, c, "")
+	}
 
 	return result
 }

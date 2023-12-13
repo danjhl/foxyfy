@@ -15,6 +15,9 @@ func TestSanitizeFileName(t *testing.T) {
 	// Should sanitize injection
 	assert.Equal(t, " malicious ", input.SanitizeFileName("\" malicious \""))
 	assert.Equal(t, " malicious ", input.SanitizeFileName("' malicious '"))
+
+	// Should sanitize special characters
+	assert.Equal(t, "special ", input.SanitizeFileName("special ,:*?<>|~´"))
 }
 
 func TestSanitizeDirectory(t *testing.T) {

@@ -6,19 +6,17 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-type Type int
-
 const (
-	DirectoryBookmark Type = 2
-	UrlBookmark            = 1
+	DirectoryBookmark int = 2
+	UrlBookmark           = 1
 )
 
 type Bookmark struct {
-	Id      int
-	Parent  int
-	Bm_type Type
-	Title   string
-	Url     string
+	Id     int
+	Parent int
+	Type   int
+	Title  string
+	Url    string
 }
 
 type Db interface {
@@ -71,11 +69,11 @@ func (s FirefoxDb) QueryChildrenFor(id int) ([]Bookmark, error) {
 	for rows.Next() {
 		var bookmark Bookmark
 		var fk *int
-		err := rows.Scan(&bookmark.Id, &bookmark.Parent, &bookmark.Bm_type, &bookmark.Title, &fk)
+		err := rows.Scan(&bookmark.Id, &bookmark.Parent, &bookmark.Type, &bookmark.Title, &fk)
 		if err != nil {
 			return nil, err
 		}
-		if bookmark.Bm_type == UrlBookmark {
+		if bookmark.Type == UrlBookmark {
 			rows2, err := db.Query("select url from moz_places where id = ?", fk)
 			if err != nil {
 				return nil, err
@@ -115,7 +113,7 @@ func GetChildBookmarksFor(id int, parentDir string, db Db) ([]ChildBookmark, err
 	var flat []ChildBookmark
 	for _, child := range children {
 		withDir := ChildBookmark{Dir: parentDir, Bm: child}
-		if child.Bm_type == DirectoryBookmark {
+		if child.Type == DirectoryBookmark {
 			var dir string
 			if parentDir != "" {
 				dir = parentDir + "/" + child.Title
