@@ -45,7 +45,31 @@ func (c UpdateCmd) Execute(args []string) {
 	nFlag := flag.Bool("n", false, "Dry run")
 
 	flag.CommandLine.Parse(args)
-	ffdb := bookmarks.FirefoxDb{Source: *dbFlag}
+
+	tmp, err := os.MkdirTemp("", "tmp")
+	defer os.RemoveAll(tmp)
+
+	source, err := os.Open(*dbFlag)
+	if err != nil {
+		fmt.Fprintf(c.out, "Error: %s\n", err)
+		return
+	}
+	defer source.Close()
+
+	dest, err := os.Create(tmp + "/places.sqlite")
+	if err != nil {
+		fmt.Fprintf(c.out, "Error: %s\n", err)
+		return
+	}
+	defer dest.Close()
+
+	_, err = io.Copy(dest, source)
+	if err != nil {
+		fmt.Fprintf(c.out, "Error: %s\n", err)
+		return
+	}
+
+	ffdb := bookmarks.FirefoxDb{Source: dest.Name()}
 
 	id, err := ffdb.QueryIdFor(*bFlag)
 	if err != nil {
